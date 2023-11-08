@@ -30,46 +30,58 @@ async function run() {
     await client.connect();
 
 
-  const menuCollection = client.db("myrestaurant").collection("menu");
-  const reviewCollection = client.db("myrestaurant").collection("reviews");
-  const cartCollection = client.db("myrestaurant").collection("carts");
+    const usersCollection = client.db("myrestaurant").collection("users");
+    const menuCollection = client.db("myrestaurant").collection("menu");
+    const reviewCollection = client.db("myrestaurant").collection("reviews");
+    const cartCollection = client.db("myrestaurant").collection("carts");
+    
 
-app.get('/menu',async(req,res)=>{
-    const result = await menuCollection.find().toArray();
-    res.send(result);
-})
+    // users related apis
+     app.post('/users',async(req,res)=>{
+      const user = req.body;
+      const result = await usersCollection.insertOne(user)
+      res.send(result);
+     })
 
-app.get('/reviews', async(req,res)=>{
-  const result = await reviewCollection.find().toArray();
-  res.send(result)
-})
+    
+    
+    //data read {menu}
+    app.get('/menu', async (req, res) => {
+      const result = await menuCollection.find().toArray();
+      res.send(result);
+    })
+    //data read {reviews}
+    app.get('/reviews', async (req, res) => {
+      const result = await reviewCollection.find().toArray();
+      res.send(result)
+    })
 
-//cart collection API {data find and data taken}
-app.get('/carts', async(req,res) =>{
-  const email = req.query.email;
-  if(!email){
-    res.send([]);
-  }
-  const query = {email: email};
-  const result = await cartCollection.find(query).toArray();
-  res.send(result)
-})
+    //cart collection API {data find and data taken}
+    app.get('/carts', async (req, res) => {
+      const email = req.query.email;
+      if (!email) {
+        res.send([]);
+      }
+      const query = { email: email };
+      const result = await cartCollection.find(query).toArray();
+      res.send(result)
+    })
 
-//cart collection
-app.post('/carts', async (req,res) =>{
-  const item =req.body;
-  console.log(item);
-  const result = await cartCollection.insertOne(item)
-  res.send(result)
-})
+    //cart collection
+    app.post('/carts', async (req, res) => {
+      const item = req.body;
+  
+      const result = await cartCollection.insertOne(item)
+      res.send(result)
+    })
 
-//delete
-app.delete('/carts/:id', async(req,res)=>{
-  const id = req.params.id;
-  const query = {_id: new ObjectId(id)};
-  const result = await cartCollection.deleteOne(query)
-  res.send(result)
-})
+    //delete
+    app.delete('/carts/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await cartCollection.deleteOne(query)
+      res.send(result)
+    })
 
 
     // Send a ping to confirm a successful connection
@@ -85,14 +97,14 @@ run().catch(console.dir);
 // mongodb end
 
 
-app.get('/', (req,res)=>{
-    res.send('boss is sitting')
+app.get('/', (req, res) => {
+  res.send('boss is sitting')
 })
 
 
 
 
 
-app.listen(port,()=>{
-    console.log(`Bistro rastaurent is Running ${port}`);
+app.listen(port, () => {
+  console.log(`Bistro rastaurent is Running ${port}`);
 })
