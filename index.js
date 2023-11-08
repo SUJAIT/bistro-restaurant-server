@@ -36,7 +36,7 @@ async function run() {
     const cartCollection = client.db("myrestaurant").collection("carts");
     
 
-    // users related apis
+    // users information related api
      app.post('/users',async(req,res)=>{
       const user = req.body;
       const result = await usersCollection.insertOne(user)
