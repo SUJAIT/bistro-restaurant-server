@@ -109,7 +109,7 @@ const verifyAdmin = async(req,res,next) =>{
       res.send(result);
     })
 
-//admin chacked Api 
+//admin chacked database  Api 
 app.get('/users/admin/:email', verifyJWT ,async (req,res)=>{
   const email = req.params.email;
 
@@ -122,19 +122,28 @@ app.get('/users/admin/:email', verifyJWT ,async (req,res)=>{
   const result = {admin: user?.role === 'admin'}
   res.send(result)
 }) 
-
+//
 
     //data read {menu}
     app.get('/menu', async (req, res) => {
       const result = await menuCollection.find().toArray();
       res.send(result);
     })
+    //
+//Create Menu Data Post Api
+app.post('/menu', verifyJWT, verifyAdmin, async(req,res)=>{
+  const newItem = req.body;
+  const result = await menuCollection.insertOne(newItem)
+  res.send(result);
+})
+//
+
     //data read {reviews}
     app.get('/reviews', async (req, res) => {
       const result = await reviewCollection.find().toArray();
       res.send(result)
     })
-
+//
     //cart collection API {data find and data taken}
     app.get('/carts', verifyJWT, async (req, res) => {
       const email = req.query.email;
@@ -143,7 +152,8 @@ app.get('/users/admin/:email', verifyJWT ,async (req,res)=>{
       }
 //jwt
       const decodedEmail = req.decoded.email;
-      if (email !== decodedEmail) {
+      if (email !== decodedEmail) //  ( !== ) checks whether its two operands are not equal, returning a Boolean result.
+      {
         return res.status(403).send({ error: true, message: 'porviden access' })
       }
 //
@@ -152,6 +162,7 @@ app.get('/users/admin/:email', verifyJWT ,async (req,res)=>{
       const result = await cartCollection.find(query).toArray();
       res.send(result)
     })
+    //
 
     //cart collection
     app.post('/carts', async (req, res) => {
@@ -160,7 +171,7 @@ app.get('/users/admin/:email', verifyJWT ,async (req,res)=>{
       const result = await cartCollection.insertOne(item)
       res.send(result)
     })
-
+//
     //delete
     app.delete('/carts/:id', async (req, res) => {
       const id = req.params.id;
@@ -168,7 +179,7 @@ app.get('/users/admin/:email', verifyJWT ,async (req,res)=>{
       const result = await cartCollection.deleteOne(query)
       res.send(result)
     })
-
+//
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
