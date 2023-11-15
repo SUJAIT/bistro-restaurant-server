@@ -138,6 +138,15 @@ app.post('/menu', verifyJWT, verifyAdmin, async(req,res)=>{
 })
 //
 
+    //delete Admin MenageItems Api 
+    app.delete('/menu/:id',verifyJWT,verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await menuCollection.deleteOne(query)
+      res.send(result)
+    })
+//
+
     //data read {reviews}
     app.get('/reviews', async (req, res) => {
       const result = await reviewCollection.find().toArray();
@@ -172,7 +181,7 @@ app.post('/menu', verifyJWT, verifyAdmin, async(req,res)=>{
       res.send(result)
     })
 //
-    //delete
+    //delete User cart Items Api 
     app.delete('/carts/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -180,6 +189,7 @@ app.post('/menu', verifyJWT, verifyAdmin, async(req,res)=>{
       res.send(result)
     })
 //
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
