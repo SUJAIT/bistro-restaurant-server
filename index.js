@@ -2,7 +2,8 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
-const stripe = require("stripe")(process.env.PAYMENT_SECRET_KEY)
+//TODO Secret Key Not Secure
+const stripe = require("stripe")('sk_test_51OHSSeCuwyVl672ZbZf4s8L2D8pS3zL3AGZA4lE6r3Sfp2m61ab4J4Zia9c3jtciAazifbGSQ35FplIrTlAnNDue00keEmpDhl')
 require('dotenv').config()
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -53,6 +54,7 @@ async function run() {
     const menuCollection = client.db("myrestaurant").collection("menu");
     const reviewCollection = client.db("myrestaurant").collection("reviews");
     const cartCollection = client.db("myrestaurant").collection("carts");
+    const paymentCollection = client.db("myrestaurant").collection("payments");
 
 
     //client side theka data pata bo ja server site a playLoad hisaba data server site a set hoba.
@@ -190,22 +192,34 @@ app.post('/menu', verifyJWT, verifyAdmin, async(req,res)=>{
       res.send(result)
     })
 //
-
-//Stripe
-//create payment intent
-app.post('/create-payment-intent',verifyJWT, async(req,res)=>{
-const {price} = req.body;
-const amount = price * 100;
-const paymentIntent = await stripe.paymentIntents.create({
-  amount: amount,
-  currency : 'usd',
-  payment_method_types:['card']
-});
-res.send({
-  clientSecret: paymentIntent.client_secrest
-})
+//Create Payment intent
+app.post('/create-payment-intent',verifyJWT,async(req,res)=>{
+  const {price} = req.body;
+  const amount = price*100;
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount:amount,
+    currency:'usd',
+   payment_method_types: [
+    "card"
+  ],
+  })
+  res.send({
+    clientSecret: paymentIntent.client_secret,
+  });
 })
 //
+//Payment Related Api
+app.post('/payments',async(req,res) =>{
+  const payment = req.body;
+  const insertResult = await paymentCollection.insertOne(payment);
+  const query = {_id: {$in: payment.cartItems.map(id => new ObjectId(id))}}
+  const deleteResult = await cartCollection.deleteMany(query)
+  
+  res.send({insertResult,deleteResult});
+})
+
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
